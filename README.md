@@ -61,13 +61,13 @@ $ npm run test:cov
 ## Migrations
 
 ```bash
-# to run migrations
+# run migrations
 $ npm run migration:run
 
-# e2e tests
+# create migration
 $ npm run migration:create ./src/migrations/Migration_Name
 
-# test coverage
+# generate migration
 $ npm run migration:generate ./src/migrations/Migration_Name
 ```
 
