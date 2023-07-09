@@ -18,6 +18,7 @@ function getDataSourceOptions(
     database: configService.get<string>('TYPEORM_SQL_DATABASE'),
     entities: [__dirname + '/../entities/*.entity{.ts,.js}'],
     migrations: [__dirname + '/../migrations/*{.ts,.js}'],
+    timezone: 'Z',
   };
 }
 
