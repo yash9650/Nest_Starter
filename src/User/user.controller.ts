@@ -1,4 +1,4 @@
-import { Body, Controller, Post, Req, Res } from '@nestjs/common';
+import { Body, Controller, Get, Post, Req, Res } from '@nestjs/common';
 import { UserService } from './user.service';
 import { Request, Response } from 'express';
 import { emptyResponse } from 'src/utils/common.utils';
@@ -6,7 +6,7 @@ import { IJsonResponse } from 'src/interfaces/common.interface';
 import { UserEntity } from 'src/entities/user.entity';
 import { UserDto } from './user.dto';
 
-@Controller({ path: 'user' })
+@Controller({ path: 'users' })
 export class UserController {
   constructor(private readonly _userService: UserService) {}
 
@@ -27,4 +27,13 @@ export class UserController {
     }
     return jsonResponse;
   };
+
+  @Get('getAllUsers')
+  async getAllUsers(
+    @Req() req: Request,
+    @Res() res: Response,
+  ): Promise<Response> {
+    const jsonResponse = await this._callUserService('getAllUsers');
+    return res.status(jsonResponse.statusCode!).json(jsonResponse);
+  }
 }

@@ -5,6 +5,10 @@ import { UserEntity } from 'src/entities/user.entity';
 import * as bcrypt from 'bcrypt';
 import { IUserPayload } from 'src/interfaces/auth.interface';
 
+type VerifyTokenResponse =
+  | { payload: IUserPayload; error: null }
+  | { payload: null; error: string };
+
 @Injectable()
 export class AuthService {
   constructor(
@@ -47,7 +51,18 @@ export class AuthService {
     return token;
   }
 
-  async verifyToken(token: string) {
-    return this._jwtService.verify(token);
+  async verifyToken(token: string): Promise<VerifyTokenResponse> {
+    try {
+      const payload: IUserPayload = await this._jwtService.verify(token);
+      return {
+        payload,
+        error: null,
+      };
+    } catch (error) {
+      return {
+        payload: null,
+        error: error.message,
+      };
+    }
   }
 }
