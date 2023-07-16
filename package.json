@@ -10,10 +10,9 @@
   "scripts": {
     "build": "nest build",
     "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\"",
-    "start": "nest start",
     "start:dev": "nest start --watch",
     "start:debug": "nest start --debug --watch",
-    "start:prod": "node dist/main",
+    "start": "node dist/main",
     "migration:run": "npm run build && npx typeorm migration:run -d dist/database/DataSource.js",
     "migration:generate": "npx typeorm-ts-node-commonjs migration:generate -d src/database/DataSource.ts",
     "migration:create": "npx typeorm-ts-node-esm migration:create",
