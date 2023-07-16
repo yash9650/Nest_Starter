@@ -1,6 +1,15 @@
-import { Column, JoinColumn, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
+import {
+  Column,
+  Entity,
+  JoinColumn,
+  ManyToOne,
+  PrimaryGeneratedColumn,
+  Unique,
+} from 'typeorm';
 import { UserEntity } from './user.entity';
 
+@Entity('rooms')
+@Unique(['userOneId', 'userSecondId'])
 export class RoomEntity {
   @PrimaryGeneratedColumn('uuid')
   uuid: string;

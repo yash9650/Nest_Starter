@@ -15,6 +15,7 @@ import { RoomService } from './Room/room.service';
 import { HttpException, HttpStatus, NotFoundException } from '@nestjs/common';
 import { RoomEntity } from 'src/entities/room.entity';
 import { RoomDto } from './Room/room.dto';
+import { MessageDTO } from './message.dto';
 
 @WebSocketGateway({
   cors: {
@@ -47,42 +48,36 @@ export class ChatGateway
     console.log('client disconnected', client.id);
   }
 
-  @SubscribeMessage('join')
+  @SubscribeMessage('join-room')
   async joinRoom(
     @ConnectedSocket() client: Socket,
     @MessageBody('roomDetails') roomDetails: RoomDto,
   ) {
     try {
-      let room: RoomEntity;
-      if (roomDetails.roomUUID) {
-        const roomData = await this._roomService.getRoom(roomDetails.roomUUID);
-        if (!roomData) {
-          throw new NotFoundException('Room not found');
-        }
-        room = roomData;
-      } else {
-        room = await this._roomService.createRoom(roomDetails);
-      }
+      const room = await this._roomService.getRoom(roomDetails);
       await client.join(room.uuid);
       console.log(room.uuid);
-      return 'Joined Room ' + room.uuid;
+      return room.uuid;
     } catch (error) {
       throw new HttpException(error.message, HttpStatus.BAD_REQUEST);
     }
   }
 
   @SubscribeMessage('getAllMessages')
-  async handleMessage(@MessageBody() message: MessageEntity) {
-    return await this._messageService.getMessages(message.roomUUID);
+  async handleMessage(@MessageBody('roomUUID') roomUUID: string) {
+    if (!roomUUID) {
+      throw new NotFoundException('Room not found');
+    }
+    return await this._messageService.getMessages(roomUUID);
   }
 
   @SubscribeMessage('sendMessage')
   async sendMessage(
     @ConnectedSocket() client: Socket,
-    @MessageBody() message: Partial<MessageEntity>,
+    @MessageBody() message: MessageDTO,
   ) {
     const sendMsg = await this._messageService.sendMessage(message);
-    client.in(sendMsg.roomUUID).emit('newMessage', sendMsg);
+    this.server.sockets.in(sendMsg.roomUUID).emit('newMessage', sendMsg);
     return sendMsg;
   }
 
@@ -90,10 +85,9 @@ export class ChatGateway
   async typing(
     @ConnectedSocket() client: Socket,
     @MessageBody('isTyping') isTyping: boolean,
+    @MessageBody('roomUUID') roomUUID: string,
   ) {
-    const rooms = client.rooms;
-    console.log(rooms);
     const typingMessage = isTyping ? 'Someone is typing' : '';
-    client.to('Room-55').emit('typingStatus', typingMessage);
+    client.in(roomUUID).emit('typingStatus', typingMessage);
   }
 }
