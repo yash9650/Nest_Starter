@@ -9,11 +9,9 @@ import {
 } from '@nestjs/websockets';
 import { Server, Socket } from 'socket.io';
 import { AuthService } from 'src/auth/auth.service';
-import { MessageEntity } from 'src/entities/message.entity';
 import { MessageService } from './message.service';
 import { RoomService } from './Room/room.service';
 import { HttpException, HttpStatus, NotFoundException } from '@nestjs/common';
-import { RoomEntity } from 'src/entities/room.entity';
 import { RoomDto } from './Room/room.dto';
 import { MessageDTO } from './message.dto';
 
@@ -36,7 +34,6 @@ export class ChatGateway
   ) {}
 
   async handleConnection(@ConnectedSocket() client: Socket) {
-    console.log('client connected', client.id);
     const authToken =
       client.handshake.headers?.authorization?.split(' ')[1] || '';
     const VerifyTokenResponse = await this._authService.verifyToken(authToken);
@@ -45,7 +42,7 @@ export class ChatGateway
   }
 
   async handleDisconnect(@ConnectedSocket() client: Socket) {
-    console.log('client disconnected', client.id);
+    // console.log('client disconnected', client.id);
   }
 
   @SubscribeMessage('join-room')
@@ -56,7 +53,6 @@ export class ChatGateway
     try {
       const room = await this._roomService.getRoom(roomDetails);
       await client.join(room.uuid);
-      console.log(room.uuid);
       return room.uuid;
     } catch (error) {
       throw new HttpException(error.message, HttpStatus.BAD_REQUEST);

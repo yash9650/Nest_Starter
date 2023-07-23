@@ -52,11 +52,19 @@ export class AppController {
     const user = req.user as IUserPayload;
     try {
       const token = await this._authService.login(user);
-      return successResponse(res, { token, user: req.user });
+      res.cookie('auth-token', token, { httpOnly: true });
+      return successResponse(res, { user: req.user });
     } catch (error: any) {
       const errorMessage = error?.message || 'Login failed';
       return errorResponse(res, errorMessage, error);
     }
+  }
+
+  @Post('getUserData')
+  @UseGuards(JWTAuthGaurd)
+  async getUserData(@Req() req: Request, @Res() res: Response) {
+    const user = req.user as IUserPayload;
+    return successResponse(res, user);
   }
 
   /**
